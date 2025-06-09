@@ -1,0 +1,11 @@
+<!-- templates/app/start.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>クイズ開始</title></head>
+<body>
+<h1>クイズを始める</h1>
+<form th:action="@{/app/start}" method="post" th:object="${quizSetting}">
+  <button type="submit">スタート</button>
+</form>
+</body>
+</html>

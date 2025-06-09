@@ -1,0 +1,18 @@
+<!-- templates/app/menu.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>メニュー</title>
+</head>
+<body>
+<h1>メニュー</h1>
+<form th:action="@{/app/menu}" method="post">
+  <button type="submit" name="mode" value="quiz">クイズ開始</button>
+  <button type="submit" name="mode" value="search">単語検索</button>
+  <button type="submit" name="mode" value="edit">単語編集</button>
+  <button type="submit" name="mode" value="register">単語登録</button>
+</form>
+<p th:if="${error}" th:text="${error}" style="color:red"></p>
+</body>
+</html>

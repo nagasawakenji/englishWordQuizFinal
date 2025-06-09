@@ -1,0 +1,39 @@
+<!-- templates/app/search.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>単語検索</title>
+</head>
+<body>
+<h1>単語検索</h1>
+<form th:action="@{/app/search}" th:object="${searchForm}" method="post">
+  <label>キーワード:
+    <input type="text" th:field="*{keyWord}" />
+  </label>
+  <label>品詞:
+    <select th:field="*{partOfSpeech}">
+      <option value="">すべて</option>
+      <option th:each="p : ${T(nagasawakenji.englishWordQuizFinal.entity.PartOfSpeech).values()}"
+              th:value="${p}" th:text="${p}"></option>
+    </select>
+  </label>
+  <button type="submit">検索</button>
+</form>
+
+<h2>検索結果</h2>
+<p th:if="${results.empty}">該当する単語はありません。</p>
+<table th:if="${!results.empty}" border="1">
+  <thead><tr><th>ID</th><th>単語</th><th>品詞</th><th>意味</th><th>操作</th></tr></thead>
+  <tbody>
+  <tr th:each="w : ${results}">
+    <td th:text="${w.id}">1</td>
+    <td th:text="${w.name}">apple</td>
+    <td th:text="${w.partOfSpeech}">NOUN</td>
+    <td th:text="${#strings.join(w.meaningList.stream().map(m->m.meaningText).toList(), ', ')}">りんご</td>
+    <td><a th:href="@{/app/edit(wordId=${w.id})}">編集</a></td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!-- templates/app/quiz.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>クイズ設定</title></head>
+<body>
+<h1>クイズ設定</h1>
+<form th:action="@{/app/quiz}" th:object="${quizSetting}" method="post">
+  <label>問題数:
+    <input type="number" th:field="*{quizCnt}" min="1" />
+    <p th:if="${#fields.hasErrors('quizCnt')}" th:errors="*{quizCnt}" style="color:red"></p>
+  </label><br/>
+  <label>品詞:
+    <select th:field="*{partOfSpeech}">
+      <option th:each="p : ${T(nagasawakenji.englishWordQuizFinal.entity.PartOfSpeech).values()}"
+              th:value="${p}" th:text="${p}"></option>
+    </select>
+    <p th:if="${#fields.hasErrors('partOfSpeech')}" th:errors="*{partOfSpeech}" style="color:red"></p>
+  </label><br/>
+  <button type="submit">設定を保存</button>
+</form>
+<p th:if="${success}" th:text="${success}" style="color:green"></p>
+</body>
+</html>

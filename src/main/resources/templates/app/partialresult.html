@@ -1,0 +1,13 @@
+<!-- templates/app/partialresult.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>部分結果</title></head>
+<body>
+<h1>問題 [[${quizSetting.nowCnt}]] の結果</h1>
+<p th:if="${isCorrect}" style="color:green">正解！</p>
+<p th:unless="${isCorrect}" style="color:red">不正解！</p>
+<form th:action="@{/app/partialresult}" method="post" th:object="${quizSetting}">
+    <button type="submit">次へ</button>
+</form>
+</body>
+</html>

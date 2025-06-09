@@ -1,0 +1,15 @@
+<!-- templates/app/answer.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>回答入力</title></head>
+<body>
+<h1>問題 [[${quizSetting.nowCnt} + 1]] / [[${quizSetting.quizCnt}]]</h1>
+<p th:text="${randomId}">単語ID</p>
+<form th:action="@{/app/answer(randomId=${randomId})}" method="post" th:object="${quizSetting}">
+  <label>意味:
+    <input type="text" name="answer" />
+  </label>
+  <button type="submit">回答</button>
+</form>
+</body>
+</html>

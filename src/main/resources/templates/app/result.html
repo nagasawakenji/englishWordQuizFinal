@@ -1,0 +1,10 @@
+<!-- templates/app/result.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>クイズ結果</title></head>
+<body>
+<h1>クイズ終了</h1>
+<p>正解数: <span th:text="${quizSetting.correctCnt}">0</span> / <span th:text="${quizSetting.quizCnt}">0</span></p>
+<a th:href="@{/app/menu}">メニューに戻る</a>
+</body>
+</html>
