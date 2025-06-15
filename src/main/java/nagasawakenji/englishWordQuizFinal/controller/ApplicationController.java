@@ -13,9 +13,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/app")
@@ -52,7 +54,7 @@ public class ApplicationController {
         return switch (mode) {
             case "quiz" -> "redirect:/app/quiz";
             case "search" -> "redirect:/app/search";
-            case "edit" -> "redirect:/app/edit";
+            case "list" -> "redirect:/app/list";
             case "register" -> "redirect:/app/register";
             default -> {
                 model.addAttribute("error", "エラーが発生しました");
@@ -68,35 +70,74 @@ public class ApplicationController {
     public String showSearchForm(Model model) {
 
         model.addAttribute("searchForm", new SearchForm());
-        model.addAttribute("results", List.of());
+        model.addAttribute("results", List.<WordForm>of());
 
-        return "/app/search";
+        return "app/search";
     }
 
     // 検索結果の取得
     // 検索に副作用はないので、リダイレクトはしない
     @PostMapping("/search")
-    public String doSearch(Model model,
-                           @ModelAttribute(name = "searchForm") SearchForm searchForm) {
-        List<Word> results = applicationService.searchWords(searchForm.getKeyWord(), searchForm.getPartOfSpeech());
-
+    public String doSearch(@ModelAttribute SearchForm searchForm, Model model) {
+        List<WordForm> results = applicationService.searchWords(
+                        searchForm.getKeyWord(),
+                        searchForm.getPartOfSpeech())
+                .stream()
+                .map(applicationService::convertWordForm)
+                .collect(Collectors.toList());
+        model.addAttribute("searchForm", searchForm);
         model.addAttribute("results", results);
-
-        return "/app/search";
+        return "app/search";
     }
+
+    // 編集する単語の選択画面の表示
+    // これで登録されている単語が全て表示され、そこから編集したい単語を選択する
+    @GetMapping("/list")
+    public String showSelectForm(Model model) {
+        List<Word> wordList = wordRepository.findAll();
+        List<WordForm> wordFormList = wordList.stream()
+                .map(word -> {
+                    WordForm wordForm = applicationService.convertWordForm(word);
+                    return wordForm;
+                }).collect(Collectors.toList());
+
+        model.addAttribute("wordFormList", wordFormList);
+
+        return "/app/list";
+    }
+
+
+    // 選択した単語の処理
+    @PostMapping("/list")
+    public String toEditForm(Model model,
+                             @RequestParam(name = "wordId") Long wordId,
+                             RedirectAttributes redirectAttributes) {
+
+        redirectAttributes.addAttribute("wordId", wordId);
+        return "redirect:/app/edit";
+    }
+
 
     // 単語編集画面の表示
     @GetMapping("/edit")
     public String showEditForm(Model model,
-                               @RequestParam(name = "wordId") long wordId) {
-       Word word = wordRepository.findById(wordId)
+                               @RequestParam(name = "wordId", required = false) Long wordId,
+                               RedirectAttributes redirectAttributes) {
+
+
+        if (wordId == null) {
+            redirectAttributes.addFlashAttribute("error", "編集対象の単語を選択してください");
+            return "redirect:/app/list";
+        }
+
+        Word word = wordRepository.findById(wordId)
                .orElseThrow(() -> new EntityNotFoundException("単語が見つかりません"));
 
        WordForm wordForm = applicationService.convertWordForm(word);
 
        model.addAttribute("wordForm", wordForm);
 
-        return "/app/edit";
+        return "app/edit";
     }
 
     // 受け取った入力の処理
@@ -106,11 +147,12 @@ public class ApplicationController {
                            BindingResult bindingResult,
                            RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            return "/app/edit";
+            return "app/edit";
         }
 
         applicationService.editWord(wordForm);
 
+        redirectAttributes.addAttribute("wordId", wordForm.getId());
         redirectAttributes.addAttribute("success", wordForm.getName() + "を編集しました");
 
         return "redirect:/app/edit";
@@ -146,29 +188,25 @@ public class ApplicationController {
 
     // クイズの出題形式選択画面の表示
     @GetMapping("/quiz")
-    public String showQuizSettingForm(Model model) {
+    public String showQuizSettingForm(Model model,
+                                      SessionStatus sessionStatus) {
 
-        QuizSetting quizSetting = new QuizSetting();
-        model.addAttribute("quizSetting", quizSetting);
+        sessionStatus.setComplete();
+        model.addAttribute("quizSetting", new QuizSetting());
 
         return "app/quiz";
     }
 
     @PostMapping("/quiz")
-    public String makeQuizSetting(Model model,
-                                  @Valid @ModelAttribute(name = "quizSetting") QuizSetting quizSetting,
-                                  BindingResult bindingResult,
-                                  RedirectAttributes redirectAttributes) {
-
+    public String makeQuizSetting(
+            @Valid @ModelAttribute("quizSetting") QuizSetting quizSetting,
+            BindingResult bindingResult
+    ) {
         if (bindingResult.hasErrors()) {
-            return "redirect:/app/quiz";
+
+            return "app/quiz";
         }
-        redirectAttributes.addAttribute("success", "クイズ形式は正常に選択されます");
-
-        List<Long> wordIdList = applicationService.makeQuizList(quizSetting.getPartOfSpeech());
-        quizSetting.setWordIdList(wordIdList);
-        redirectAttributes.addFlashAttribute("quizSetting", quizSetting);
-
+        quizSetting.setWordIdList(applicationService.makeQuizList(quizSetting.getPartOfSpeech()));
         return "redirect:/app/start";
     }
 
@@ -183,16 +221,12 @@ public class ApplicationController {
 
     @PostMapping("/start")
     public String makeQuestion(Model model,
-                        @Valid @ModelAttribute(name = "quizSetting") QuizSetting quizSetting,
-                        BindingResult bindingResult,
+                        @ModelAttribute(name = "quizSetting") QuizSetting quizSetting,
                         RedirectAttributes redirectAttributes) {
-        if (bindingResult.hasErrors()) {
-            return "redirect:/app/quiz";
-        }
 
         Long randomId = applicationService.choseRandomId(quizSetting.getWordIdList());
-        redirectAttributes.addFlashAttribute("quizSetting", quizSetting);
-        redirectAttributes.addFlashAttribute("randomId", randomId);
+        redirectAttributes.addAttribute("randomId", randomId);
+
 
         return "redirect:/app/answer";
     }
@@ -205,21 +239,26 @@ public class ApplicationController {
                               @ModelAttribute(name = "quizSetting") QuizSetting quizSetting,
                               @RequestParam(name = "randomId") Long randomId) {
 
+        Word randomWord = wordRepository.findById(randomId)
+                .orElseThrow(() -> new EntityNotFoundException("単語が見つかりません"));
+
+        WordForm randomWordForm = applicationService.convertWordForm(randomWord);
+
+        model.addAttribute("randomWord",  randomWordForm.getName());
+        model.addAttribute("meaningList", randomWordForm.getMeaningListString());
+        model.addAttribute("randomId",    randomId);
+
         return "app/answer";
     }
 
     // クイズの正誤判定
     @PostMapping("/answer")
     public String judgePartialResult(Model model,
-                                    @Valid @ModelAttribute(name = "quizSetting") QuizSetting quizSetting,
-                                     BindingResult bindingResult,
+                                    @ModelAttribute(name = "quizSetting") QuizSetting quizSetting,
                                      RedirectAttributes redirectAttributes,
                                     @RequestParam(name = "randomId") Long randomId,
                                     @RequestParam(name = "answer") String answer) {
 
-        if (bindingResult.hasErrors()){
-            return "redirect:/app/quiz";
-        }
 
         boolean isCorrect = applicationService.judgeIsCorrect(randomId, answer);
 
@@ -228,9 +267,8 @@ public class ApplicationController {
         }
         quizSetting.setNowCnt(quizSetting.getNowCnt() + 1);
 
-        redirectAttributes.addFlashAttribute("quizSetting", quizSetting);
-        redirectAttributes.addFlashAttribute("randomId", randomId);
-        redirectAttributes.addFlashAttribute("isCorrect", isCorrect);
+        redirectAttributes.addAttribute("randomId", randomId);
+        redirectAttributes.addAttribute("isCorrect", isCorrect);
 
         return "redirect:/app/partialresult";
     }
@@ -243,22 +281,20 @@ public class ApplicationController {
                                     @RequestParam(name = "randomId") Long randomId,
                                     @RequestParam(name = "isCorrect") boolean isCorrect) {
 
+        model.addAttribute("randomId", randomId);
+        model.addAttribute("isCorrect", isCorrect);
 
-        return "/app/partialresult";
+        return "app/partialresult";
     }
 
     // 次のクイズ画面への移動
     @PostMapping("/partialresult")
     public String moveNextQuestion(Model model,
-                                   @Valid @ModelAttribute(name = "quizSetting") QuizSetting quizSetting,
-                                   BindingResult bindingResult,
+                                   @ModelAttribute(name = "quizSetting") QuizSetting quizSetting,
                                    RedirectAttributes redirectAttributes) {
-        if (bindingResult.hasErrors()){
-            return "redirect:/app/quiz";
-        }
-        redirectAttributes.addFlashAttribute("quizSetting", quizSetting);
 
-        if (quizSetting.getNowCnt() > quizSetting.getQuizCnt()) {
+
+        if (quizSetting.getNowCnt() >= quizSetting.getQuizCnt()) {
             return "redirect:/app/result";
         }
 

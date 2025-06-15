@@ -1,18 +1,69 @@
-<!-- templates/app/menu.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>メニュー</title>
+  <style>
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 90%;
+      max-width: 600px;
+      margin: 50px auto;
+      background-color: #111111;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #2196f3;
+      font-size: 24px;
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .btn {
+      background-color: #2196f3;
+      color: #ffffff;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+    .btn:hover {
+      background-color: #1976d2;
+    }
+    .error {
+      margin-top: 20px;
+      color: #f44336;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-<h1>メニュー</h1>
-<form th:action="@{/app/menu}" method="post">
-  <button type="submit" name="mode" value="quiz">クイズ開始</button>
-  <button type="submit" name="mode" value="search">単語検索</button>
-  <button type="submit" name="mode" value="edit">単語編集</button>
-  <button type="submit" name="mode" value="register">単語登録</button>
-</form>
-<p th:if="${error}" th:text="${error}" style="color:red"></p>
+<div class="container">
+  <h1>英単語クイズ</h1>
+  <form th:action="@{/app/menu}" method="post">
+    <div class="btn-group">
+      <button class="btn" type="submit" name="mode" value="quiz">クイズ開始</button>
+      <button class="btn" type="submit" name="mode" value="search">単語検索</button>
+      <button class="btn" type="submit" name="mode" value="list">単語編集</button>
+      <button class="btn" type="submit" name="mode" value="register">単語登録</button>
+    </div>
+  </form>
+  <p th:if="${error}" th:text="${error}" class="error"></p>
+</div>
 </body>
 </html>

@@ -1,6 +1,7 @@
 package nagasawakenji.englishWordQuizFinal.dto;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import nagasawakenji.englishWordQuizFinal.entity.PartOfSpeech;
 
@@ -13,11 +14,14 @@ public class QuizSetting {
 
     private int nowCnt = 0;
 
-    @NotNull(message = "品詞を選択してください")
+
     private PartOfSpeech partOfSpeech;
     private int correctCnt;
     private List<Long> wordIdList;
 
+
+
+    private List<PartOfSpeech> partOfSpeechList;
 
     public QuizSetting() {};
 
@@ -59,5 +63,13 @@ public class QuizSetting {
 
     public int getNowCnt() {
         return nowCnt;
+    }
+
+    public void setPartOfSpeechList(List<PartOfSpeech> partOfSpeechList) {
+        this.partOfSpeechList = partOfSpeechList;
+    }
+
+    public List<PartOfSpeech> getPartOfSpeechList() {
+        return partOfSpeechList;
     }
 }

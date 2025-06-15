@@ -1,10 +1,64 @@
-<!-- templates/app/result.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>クイズ結果</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>クイズ結果</title>
+    <style>
+        body {
+          background-color: #000;
+          color: #fff;
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+        }
+        .container {
+          width: 90%;
+          max-width: 500px;
+          margin: 80px auto;
+          background-color: #111;
+          padding: 30px;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+          text-align: center;
+        }
+        h1 {
+          color: #2196f3;
+          font-size: 28px;
+          margin-bottom: 20px;
+        }
+        .score {
+          font-size: 20px;
+          margin-bottom: 30px;
+        }
+        .score span:nth-child(2) {
+          color: #4CAF50; /* correct count */
+        }
+        .score span:nth-child(4) {
+          color: #ccc;
+        }
+        .btn-back {
+          display: inline-block;
+          padding: 10px 20px;
+          background-color: transparent;
+          color: #2196f3;
+          border: 1px solid #2196f3;
+          border-radius: 4px;
+          text-decoration: none;
+          font-size: 16px;
+          transition: background-color 0.3s ease;
+          cursor: pointer;
+        }
+        .btn-back:hover {
+          background-color: #2196f3;
+          color: #fff;
+        }
+    </style>
+</head>
 <body>
-<h1>クイズ終了</h1>
-<p>正解数: <span th:text="${quizSetting.correctCnt}">0</span> / <span th:text="${quizSetting.quizCnt}">0</span></p>
-<a th:href="@{/app/menu}">メニューに戻る</a>
+<div class="container">
+    <h1>クイズ終了</h1>
+    <p class="score">正解数: <span th:text="${quizSetting.correctCnt}">0</span> / <span th:text="${quizSetting.quizCnt}">0</span></p>
+    <a th:href="@{/app/menu}" class="btn-back">メニューに戻る</a>
+</div>
 </body>
 </html>

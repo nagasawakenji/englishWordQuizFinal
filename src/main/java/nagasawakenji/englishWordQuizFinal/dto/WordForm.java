@@ -18,6 +18,10 @@ public class WordForm {
     @NotBlank(message = "意味を入力してください")
     private String meaningListString;
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

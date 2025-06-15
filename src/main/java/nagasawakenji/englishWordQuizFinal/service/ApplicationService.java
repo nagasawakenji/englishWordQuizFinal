@@ -28,6 +28,7 @@ public class ApplicationService {
     public WordForm convertWordForm(Word word) {
         WordForm wordForm = new WordForm();
 
+        wordForm.setId(word.getId());
         wordForm.setName(word.getName());
         wordForm.setPartOfSpeech(word.getPartOfSpeech());
 
@@ -45,6 +46,7 @@ public class ApplicationService {
     public Word convertWord(WordForm wordForm) {
 
         Word word = new Word();
+        word.setId(word.getId());
         word.setName(wordForm.getName());
 
        word.setPartOfSpeech(wordForm.getPartOfSpeech());
@@ -106,28 +108,30 @@ public class ApplicationService {
         ).filter(text -> !text.isBlank())
                 .collect(Collectors.toList());
 
-        List<Mean> meaningList = meaningListString.stream()
-                .map(text -> {
-                    Mean mean = new Mean();
-                    mean.setWord(word);
-                    mean.setMeaningText(text);
-                    return mean;
-                }).collect(Collectors.toList());
+        List<Mean> meaningList = word.getMeaningList();
 
-       word.getMeaningList().clear();
-       word.setMeaningList(meaningList);
+        word.getMeaningList().clear();
 
-        saveWord(word);
+        for (String meaningString : meaningListString) {
+           Mean mean = new Mean();
+           mean.setWord(word);
+           mean.setMeaningText(meaningString);
+           meaningList.add(mean);
+        }
 
     }
 
+    @Transactional(readOnly = true)
     public List<Long> makeQuizList(PartOfSpeech partOfSpeech) {
-        List<Word> wordList = wordRepository.findByPartOfSpeech(partOfSpeech);
-        List<Long> wordIdList = wordList.stream()
-                .map(word -> word.getId())
+        List<Word> wordList;
+        if (partOfSpeech == null) {
+            wordList = wordRepository.findAll();
+        } else {
+            wordList = wordRepository.findByPartOfSpeech(partOfSpeech);
+        }
+        return wordList.stream()
+                .map(Word::getId)
                 .collect(Collectors.toList());
-
-        return wordIdList;
     }
 
     public Long choseRandomId(List<Long> wordIdList) {

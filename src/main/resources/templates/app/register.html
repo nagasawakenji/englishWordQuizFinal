@@ -1,30 +1,122 @@
-<!-- templates/app/register.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>単語登録</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 90%;
+      max-width: 600px;
+      margin: 50px auto;
+      background-color: #111;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+    }
+    h1 {
+      color: #2196f3;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      color: #ccc;
+    }
+    input[type="text"], select {
+      padding: 8px;
+      border: 1px solid #333;
+      border-radius: 4px;
+      background-color: #1a1a1a;
+      color: #fff;
+      margin-top: 5px;
+    }
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+      text-decoration: none;
+    }
+    .btn-submit {
+      background-color: #2196f3;
+      color: #fff;
+    }
+    .btn-submit:hover {
+      background-color: #1976d2;
+    }
+    .btn-back {
+      background-color: transparent;
+      color: #2196f3;
+      border: 1px solid #2196f3;
+    }
+    .btn-back:hover {
+      background-color: #2196f3;
+      color: #fff;
+    }
+    .error {
+      color: #f44336;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    .success {
+      color: #4CAF50;
+      font-size: 14px;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-<h1>単語登録</h1>
-<form th:action="@{/app/register}" th:object="${wordForm}" method="post">
-  <label>単語:
-    <input type="text" th:field="*{name}" />
-    <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:red"></p>
-  </label><br/>
-  <label>品詞:
-    <select th:field="*{partOfSpeech}">
-      <option th:each="p : ${T(nagasawakenji.englishWordQuizFinal.entity.PartOfSpeech).values()}"
-              th:value="${p}" th:text="${p}"></option>
-    </select>
-    <p th:if="${#fields.hasErrors('partOfSpeech')}" th:errors="*{partOfSpeech}" style="color:red"></p>
-  </label><br/>
-  <label>意味 (カンマ区切り):
-    <input type="text" th:field="*{meaningListString}" />
-    <p th:if="${#fields.hasErrors('meaningListString')}" th:errors="*{meaningListString}" style="color:red"></p>
-  </label><br/>
-  <button type="submit">登録</button>
-</form>
-<p th:if="${successMessage}" th:text="${successMessage}" style="color:green"></p>
+<div class="container">
+  <h1>単語登録</h1>
+  <button class="btn btn-back" type="button" th:onclick="|location.href='@{/app/menu}'|">メニューに戻る</button>
+  <form th:action="@{/app/register}" th:object="${wordForm}" method="post">
+    <label>
+      単語:
+      <input type="text" th:field="*{name}" />
+      <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error"></p>
+    </label>
+    <label>
+      品詞:
+      <select th:field="*{partOfSpeech}">
+        <option value="">-- 選択 --</option>
+        <option th:each="p : ${T(nagasawakenji.englishWordQuizFinal.entity.PartOfSpeech).values()}" th:value="${p}" th:text="${p}"></option>
+      </select>
+      <p th:if="${#fields.hasErrors('partOfSpeech')}" th:errors="*{partOfSpeech}" class="error"></p>
+    </label>
+    <label>
+      意味 (カンマ区切り):
+      <input type="text" th:field="*{meaningListString}" />
+      <p th:if="${#fields.hasErrors('meaningListString')}" th:errors="*{meaningListString}" class="error"></p>
+    </label>
+    <div class="form-actions">
+      <button class="btn btn-submit" type="submit">登録</button>
+    </div>
+  </form>
+  <p th:if="${successMessage}" th:text="${successMessage}" class="success"></p>
+</div>
 </body>
 </html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>単語一覧</title>
+    <style>
+        body {
+          background-color: #000;
+          color: #fff;
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+        }
+        .container {
+          width: 90%;
+          max-width: 800px;
+          margin: 50px auto;
+          background-color: #111;
+          padding: 30px;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+        }
+        h1 {
+          color: #2196f3;
+          text-align: center;
+          margin-bottom: 20px;
+          font-size: 24px;
+        }
+        .btn {
+          padding: 8px 16px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          transition: background-color 0.3s ease;
+          text-decoration: none;
+          margin-bottom: 20px;
+        }
+        .btn-back {
+          background-color: transparent;
+          color: #2196f3;
+          border: 1px solid #2196f3;
+        }
+        .btn-back:hover {
+          background-color: #2196f3;
+          color: #fff;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        th, td {
+          padding: 12px;
+          border-bottom: 1px solid #333;
+          text-align: left;
+        }
+        th {
+          background-color: #1a1a1a;
+        }
+        tr:hover {
+          background-color: #222;
+        }
+        form.inline {
+          display: inline;
+        }
+        .edit-button {
+          background-color: #2196f3;
+          color: #fff;
+          border: none;
+          padding: 6px 12px;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+        .edit-button:hover {
+          background-color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>単語一覧</h1>
+    <button class="btn btn-back" type="button" th:onclick="|location.href='@{/app/menu}'|">メニューに戻る</button>
+    <table>
+        <thead>
+        <tr><th>ID</th><th>単語</th><th>品詞</th><th>意味</th><th>操作</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="wf : ${wordFormList}">
+            <td th:text="${wf.id}">1</td>
+            <td th:text="${wf.name}">apple</td>
+            <td th:text="${wf.partOfSpeech}">NOUN</td>
+            <td th:text="${wf.meaningListString}">りんご</td>
+            <td>
+                <form th:action="@{/app/list}" method="post" class="inline">
+                    <input type="hidden" name="wordId" th:value="${wf.id}" />
+                    <button class="edit-button" type="submit">編集</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
